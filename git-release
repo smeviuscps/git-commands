@@ -1,0 +1,100 @@
+#!/bin/bash
+set -e
+
+FINISH_RELEASE=0
+DO_MINOR=0
+DO_MAJOR=0
+
+while getopts ":hf-:" option; do
+    case "${option}" in
+		h)
+			echo "\
+-h help \
+-f finish release \
+--minor increment minor \
+--major increment major"
+			exit 1
+			;;
+					
+        f)
+            FINISH_RELEASE=1
+            ;;
+        -)
+            case ${OPTARG} in
+                "minor"*)
+						DO_MINOR=1
+                        NEWTAG="$MAJOR.$MINORSTR$MINORINCREMENT.0"
+                    ;;
+                "major"*)
+                        DO_MAJOR=1
+						DO_MINOR=0
+                        NEWTAG="$MAJORSTR$MAJORINCREMENT.0.0"
+                    ;;
+            esac
+    esac
+done
+
+git fetch --all
+git checkout master
+
+CURTAG=$(git describe --abbrev=0 --tags)
+MAJOR=$(echo $CURTAG | sed -e 's/\.[a-z0-9\_\-]*\.[a-z0-9\_\-]*.*$//g')
+MINOR=$(echo $CURTAG | sed -e 's/^[a-z0-9\_\-]*\.//g' |  sed -e 's/\.[a-z0-9\_\-]*.*$//g')
+PATCH=$(echo $CURTAG | sed -e 's/^.*\..*\.//g')
+PATCHSTR=$(echo $PATCH | sed -e 's/[0-9]*$//g')
+if [ ! -z $PATCHSTR ]
+then
+	PATCHNR=$(echo $PATCH | sed "s/$PATCHSTR//g")
+else
+	PATCHNR=$PATCH
+fi
+
+MINORSTR=$(echo $MINOR | sed -e 's/[0-9]*$//g')
+if [ ! -z $MINORSTR ]
+then
+	MINORNR=$(echo $MINOR | sed "s/$MINORSTR//g")
+else
+	MINORNR=$MINOR
+fi
+
+MAJORSTR=$(echo $MAJOR | sed -e 's/[0-9]*$//g')
+if [ ! -z $MAJORSTR ]
+then
+	MAJORNR=$(echo $MAJOR | sed "s/$MAJORSTR//g")
+else
+	MAJORNR=$MAJOR
+fi
+
+PATCHINCREMENT=$((($PATCHNR+1)))
+MINORINCREMENT=$((($MINORNR+1)))
+MAJORINCREMENT=$((($MAJORNR+1)))
+NEWTAG="$MAJOR.$MINOR.$PATCHSTR$PATCHINCREMENT"
+
+
+
+if [ "$DO_MINOR" == 1 ]; then
+    NEWTAG="$MAJOR.$MINORSTR$MINORINCREMENT.0"
+fi
+if [ "$DO_MAJOR" == 1 ]; then
+    NEWTAG="$MAJORSTR$MAJORINCREMENT.0.0"
+fi
+
+git checkout develop
+
+release_branch_name="release/$NEWTAG"
+if git rev-parse --quiet --verify $release_branch_name > /dev/null; then
+   git checkout $release_branch_name
+else
+   git checkout -b $release_branch_name
+fi
+release_note=$(git write-changelog -w | less | grep -m1 "" | sed -E -e "s/.*?(\[.*)\ \(.*/\1/g")
+sed -i -E "s/version' =>.*/version\x27 => \x27$NEWTAG\x27,/" ext_emconf.php
+git commit -a -m "$release_note"
+#git tag $NEWTAG
+if [ "$FINISH_RELEASE" != 0 ]; then
+    git checkout develop
+    git merge --no-edit $release_branch_name
+    git checkout master
+    git merge --no-edit $release_branch_name
+    git tag $NEWTAG
+fi
