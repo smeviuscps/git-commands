@@ -87,8 +87,8 @@ if git rev-parse --quiet --verify $release_branch_name > /dev/null; then
 else
    git checkout -b $release_branch_name
 fi
-release_note=$(git write-changelog -w | less | grep -m1 "" | sed -E -e "s/.*?(\[.*)\ \(.*/\1/g")
-sed -i -E "s/version' =>.*/version\x27 => \x27$NEWTAG\x27,/" ext_emconf.php
+release_note=$(git write-changelog -w | less | grep -m1 "" | sed "s;^\(.*\)\[\(.*\)\ (\(.*\)$;\[\2;")
+sed -i -E "s/version' =>.*/version' => '$NEWTAG',/" ext_emconf.php
 git commit -a -m "$release_note"
 #git tag $NEWTAG
 if [ "$FINISH_RELEASE" != 0 ]; then
