@@ -18,11 +18,11 @@ while getopts ":hfe:-:" option; do
 -e path to ext_emconf.php"
 			exit 1
 			;;
-					
-        e)            
+
+        e)
 			EMCONF_PATH=${OPTARG}
             ;;
-					
+
         f)
             FINISH_RELEASE=1
             ;;
@@ -95,7 +95,9 @@ else
    git checkout -b $release_branch_name
 fi
 release_note=$(git write-changelog -w | less | grep -m1 "" | sed "s;^\(.*\)\[\(.*\)\ (\(.*\)$;\[\2;")
-sed -i -E "s/version' =>.*/version' => '$NEWTAG',/" $EMCONF_PATH$EMCONF_FILENAME
+if [[ -f "$EMCONF_PATH$EMCONF_FILENAME" ]]; then
+    sed -i -E "s/version' =>.*/version' => '$NEWTAG',/" $EMCONF_PATH$EMCONF_FILENAME
+fi
 git commit -a -m "$release_note"
 #git tag $NEWTAG
 if [ "$FINISH_RELEASE" != 0 ]; then
