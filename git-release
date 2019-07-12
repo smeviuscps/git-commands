@@ -119,8 +119,6 @@ then
 else
 	git commit -a -m "[RELEASE] Release $NEWTAG"
 fi
-
-git commit -a -m "$release_note"
 #git tag $NEWTAG
 if [ "$FINISH_RELEASE" != 0 ]; then
     git checkout develop
