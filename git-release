@@ -42,7 +42,11 @@ while getopts ":hfe:-:" option; do
 done
 
 git fetch --all
-git checkout master
+if git rev-parse --quiet --verify master > /dev/null; then
+   git checkout master
+else
+   git checkout -b master
+fi
 
 CURTAG=$(git describe --abbrev=0 --tags)
 MAJOR=$(echo $CURTAG | sed -e 's/\.[a-z0-9\_\-]*\.[a-z0-9\_\-]*.*$//g')
@@ -86,7 +90,11 @@ if [ "$DO_MAJOR" == 1 ]; then
     NEWTAG="$MAJORSTR$MAJORINCREMENT.0.0"
 fi
 
-git checkout develop
+if git rev-parse --quiet --verify develop > /dev/null; then
+   git checkout develop
+else
+   git checkout -b develop
+fi
 
 release_branch_name="release/$NEWTAG"
 if git rev-parse --quiet --verify $release_branch_name > /dev/null; then
@@ -98,6 +106,14 @@ release_note=$(git write-changelog -w | less | grep -m1 "" | sed "s;^\(.*\)\[\(.
 if [[ -f "$EMCONF_PATH$EMCONF_FILENAME" ]]; then
     sed -i -E "s/version' =>.*/version' => '$NEWTAG',/" $EMCONF_PATH$EMCONF_FILENAME
 fi
+
+if [ ! -z $release_note ]
+then
+	git commit -a -m "$release_note"
+else
+	git commit -a -m "[RELEASE] Release $NEWTAG"
+fi
+
 git commit -a -m "$release_note"
 #git tag $NEWTAG
 if [ "$FINISH_RELEASE" != 0 ]; then
