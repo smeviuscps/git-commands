@@ -121,7 +121,7 @@ then
 else
 	git commit -m "[RELEASE] Release $NEWTAG"
 fi
-#git tag $NEWTAG
+
 if [ "$FINISH_RELEASE" != 0 ]; then
     git checkout develop
     git merge --no-edit $release_branch_name
