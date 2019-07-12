@@ -4,17 +4,24 @@ set -e
 FINISH_RELEASE=0
 DO_MINOR=0
 DO_MAJOR=0
+EMCONF_PATH=
+EMCONF_FILENAME=ext_emconf.php
 
-while getopts ":hf-:" option; do
+while getopts ":hfe:-:" option; do
     case "${option}" in
 		h)
 			echo "\
 -h help \
 -f finish release \
 --minor increment minor \
---major increment major"
+--major increment major \
+-e path to ext_emconf.php"
 			exit 1
 			;;
+					
+        e)            
+			EMCONF_PATH=${OPTARG}
+            ;;
 					
         f)
             FINISH_RELEASE=1
@@ -88,7 +95,7 @@ else
    git checkout -b $release_branch_name
 fi
 release_note=$(git write-changelog -w | less | grep -m1 "" | sed "s;^\(.*\)\[\(.*\)\ (\(.*\)$;\[\2;")
-sed -i -E "s/version' =>.*/version' => '$NEWTAG',/" ext_emconf.php
+sed -i -E "s/version' =>.*/version' => '$NEWTAG',/" $EMCONF_PATH$EMCONF_FILENAME
 git commit -a -m "$release_note"
 #git tag $NEWTAG
 if [ "$FINISH_RELEASE" != 0 ]; then
@@ -97,4 +104,5 @@ if [ "$FINISH_RELEASE" != 0 ]; then
     git checkout master
     git merge --no-edit $release_branch_name
     git tag $NEWTAG
+	git branch -d $release_branch_name
 fi
