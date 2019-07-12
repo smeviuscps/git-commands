@@ -48,7 +48,13 @@ else
    git checkout -b master
 fi
 
+set +e
 CURTAG=$(git describe --abbrev=0 --tags)
+set -e
+if [ -z $CURTAG ]
+then
+	CURTAG="0.0.0"
+fi
 MAJOR=$(echo $CURTAG | sed -e 's/\.[a-z0-9\_\-]*\.[a-z0-9\_\-]*.*$//g')
 MINOR=$(echo $CURTAG | sed -e 's/^[a-z0-9\_\-]*\.//g' |  sed -e 's/\.[a-z0-9\_\-]*.*$//g')
 PATCH=$(echo $CURTAG | sed -e 's/^.*\..*\.//g')
