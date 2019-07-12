@@ -109,15 +109,17 @@ else
    git checkout -b $release_branch_name
 fi
 release_note=$(git write-changelog -w | less | grep -m1 "" | sed "s;^\(.*\)\[\(.*\)\ (\(.*\)$;\[\2;")
+git add ChangeLog
 if [[ -f "$EMCONF_PATH$EMCONF_FILENAME" ]]; then
     sed -i -E "s/version' =>.*/version' => '$NEWTAG',/" $EMCONF_PATH$EMCONF_FILENAME
+    git add $EMCONF_PATH$EMCONF_FILENAME
 fi
 
 if [ ! -z $release_note ]
 then
-	git commit -a -m "$release_note"
+	git commit -m "$release_note"
 else
-	git commit -a -m "[RELEASE] Release $NEWTAG"
+	git commit -m "[RELEASE] Release $NEWTAG"
 fi
 #git tag $NEWTAG
 if [ "$FINISH_RELEASE" != 0 ]; then
