@@ -108,15 +108,25 @@ if git rev-parse --quiet --verify $release_branch_name > /dev/null; then
 else
    git checkout -b $release_branch_name
 fi
-release_note=$(git write-changelog -w | less | grep -m1 "" | sed "s;^\(.*\)\[\(.*\)\ (\(.*\)$;\[\2;")
+release_note=$(git write-changelog | less | grep -m1 "" | sed "s;^\(.*\)\[\(.*\)\ (\(.*\)$;\[\2;")
 git add ChangeLog
 if [[ -f "$EMCONF_PATH$EMCONF_FILENAME" ]]; then
-    sed -i -E "s/version' =>.*/version' => '$NEWTAG',/" $EMCONF_PATH$EMCONF_FILENAME
+
+	
+	# Mac OSX
+	if [[ "$OSTYPE" == "darwin"* ]]; then
+		echo $OSTYPE
+		sed -i "" -e "s/version' =>.*/version' => '$NEWTAG',/" $EMCONF_PATH$EMCONF_FILENAME
+	else
+		sed -i -E "s/version' =>.*/version' => '$NEWTAG',/" $EMCONF_PATH$EMCONF_FILENAME
+	fi
+	
     git add $EMCONF_PATH$EMCONF_FILENAME
 fi
 
-if [ ! -z $release_note ]
-then
+echo "$release_note"
+
+if set|grep '^release_note=' >/dev/null; then
 	git commit -m "$release_note"
 else
 	git commit -m "[RELEASE] Release $NEWTAG"
@@ -129,4 +139,5 @@ if [ "$FINISH_RELEASE" != 0 ]; then
     git merge --no-edit $release_branch_name
     git tag $NEWTAG
 	git branch -d $release_branch_name
+	git checkout develop
 fi
