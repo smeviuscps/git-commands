@@ -139,4 +139,5 @@ if [ "$FINISH_RELEASE" != 0 ]; then
     git merge --no-edit $release_branch_name
     git tag $NEWTAG
 	git branch -d $release_branch_name
+	git checkout develop
 fi
