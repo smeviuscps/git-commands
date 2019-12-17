@@ -112,7 +112,7 @@ release_note=$(git write-changelog | less | grep -m1 "" | sed "s;^\(.*\)\[\(.*\)
 git add ChangeLog
 if [[ -f "$EMCONF_PATH$EMCONF_FILENAME" ]]; then
 
-	
+
 	# Mac OSX
 	if [[ "$OSTYPE" == "darwin"* ]]; then
 		echo $OSTYPE
@@ -120,7 +120,7 @@ if [[ -f "$EMCONF_PATH$EMCONF_FILENAME" ]]; then
 	else
 		sed -i -E "s/version' =>.*/version' => '$NEWTAG',/" $EMCONF_PATH$EMCONF_FILENAME
 	fi
-	
+
     git add $EMCONF_PATH$EMCONF_FILENAME
 fi
 
@@ -134,9 +134,9 @@ fi
 
 if [ "$FINISH_RELEASE" != 0 ]; then
     git checkout develop
-    git merge --no-edit $release_branch_name
+    git merge --no-ff --no-edit $release_branch_name
     git checkout master
-    git merge --no-edit $release_branch_name
+    git merge --no-ff --no-edit $release_branch_name
     git tag $NEWTAG
 	git branch -d $release_branch_name
 	git checkout develop

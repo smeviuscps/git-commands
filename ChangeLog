@@ -1,3 +1,6 @@
+2019-12-17         [RELEASE] Release of git-commands 1.0.3 (Steffen Mevius)
+2019-12-17 83aabb8 [TASK] add no-ff on merge to have correct git log (Steffen Mevius)
+
 2019-10-02         [RELEASE] Release of git-commands 1.0.2 (Steffen Mevius)
 2019-10-02 1f274e5 [TASK] Do a git checkout develop after release is completed (Vladimir Falcon)
 2019-09-27 323074f Fixed sed -i Option for mac and variable release_note check (Vladimir Falcon)
