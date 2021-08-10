@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 
+GIT_MAIN_BRANCH=main
 FINISH_RELEASE=0
 DO_MINOR=0
 DO_MAJOR=0
@@ -41,11 +42,15 @@ while getopts ":hfe:-:" option; do
     esac
 done
 
+if git branch --all | grep master <> /dev/null; then
+   GIT_MAIN_BRANCH=master
+fi
+
 git fetch --all
-if git rev-parse --quiet --verify master > /dev/null; then
-   git checkout master
+if git rev-parse --quiet --verify $GIT_MAIN_BRANCH > /dev/null; then
+   git checkout $GIT_MAIN_BRANCH
 else
-   git checkout -b master
+   git checkout -b $GIT_MAIN_BRANCH
 fi
 
 set +e
@@ -135,7 +140,7 @@ fi
 if [ "$FINISH_RELEASE" != 0 ]; then
     git checkout develop
     git merge --no-ff --no-edit $release_branch_name
-    git checkout master
+    git checkout $GIT_MAIN_BRANCH
     git merge --no-ff --no-edit $release_branch_name
     git tag $NEWTAG
 	git branch -d $release_branch_name
