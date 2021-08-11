@@ -42,7 +42,7 @@ while getopts ":hfe:-:" option; do
     esac
 done
 
-if git branch --all | grep master <> /dev/null; then
+if git branch --all | grep master > /dev/null; then
    GIT_MAIN_BRANCH=master
 fi
 
